@@ -137,10 +137,20 @@ aws cloudformation create-stack --stack-name Demo-DynamoDB-Stack --template-body
 
 
 ## 10. AWS SAMでLambda/API Gatewayのデプロイ       
-* Cloud9上で実施すること
+* Cloud9上で以下実施する
+
+* SAM CLIのアップデート
+```sh
+# SAM CLIのアップデート
+wget https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
+unzip aws-sam-cli-linux-x86_64.zip -d sam-installation
+sudo ./sam-installation/install --update
+# バージョン確認
+sam --version
+```
 
 * Lambda実行環境用にコンパイルするためのDockerイメージ
-```作成
+```sh
 # al2-graalvm:mavenというDockerイメージを作成
 build-image.sh
 ```
