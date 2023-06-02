@@ -7,28 +7,11 @@
 
 .DEFAULT_GOAL := build
 
+BUILD_TASKS: build-GetUsersFunction build-PostUsersFunction build-GetTodoFunction build-PostTodoFunction
 clean:
 	mvn clean
 
-build-GetUsersFunction:
-	mvn -Pnative clean native:compile
-	cp ./target/native $(ARTIFACTS_DIR)
-	chmod 755 ./target/classes/bootstrap
-	cp ./target/classes/bootstrap $(ARTIFACTS_DIR)	
-
-build-PostUsersFunction:
-	mvn -Pnative clean native:compile
-	cp ./target/native $(ARTIFACTS_DIR)
-	chmod 755 ./target/classes/bootstrap
-	cp ./target/classes/bootstrap $(ARTIFACTS_DIR)	
-
-build-GetTodoFunction:
-	mvn -Pnative clean native:compile
-	cp ./target/native $(ARTIFACTS_DIR)
-	chmod 755 ./target/classes/bootstrap
-	cp ./target/classes/bootstrap $(ARTIFACTS_DIR)	
-
-build-PostTodoFunction:
+$(BUILD_TASKS):
 	mvn -Pnative clean native:compile
 	cp ./target/native $(ARTIFACTS_DIR)
 	chmod 755 ./target/classes/bootstrap
