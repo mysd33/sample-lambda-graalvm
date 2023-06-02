@@ -36,8 +36,7 @@
 
 * Cloud9等のAmazon Linux2によるビルド環境の準備
     * GraalVMによって生成されるアーティファクトはプラットフォームに依存し、異なるアーキテクチャまたは OSのプラットフォームでは実行できない。このため、Amazon Linux2上でのビルドが必要である。
-    * ソースコードの確認、修正は手元のWindows端末などでもよいが、ビルドやデプロイといったSAM CLIの実行を、Amazon Linux2環境としてCloud9を準備し、実施する。
-        * t3.large(8GiBメモリ+2vCPU)で作成
+    * ソースコードの確認、修正は手元のWindows端末などでもよいが、ビルドやデプロイといったSAM CLIの実行を、Amazon Linux2環境としてCloud9を準備し、実施する。        
 
 ## 1. IAMの作成
 ```sh
@@ -139,7 +138,7 @@ aws cloudformation create-stack --stack-name Demo-DynamoDB-Stack --template-body
 
 ## 10. AWS SAMでLambda/API Gatewayのデプロイ       
 * Cloud9上で以下実施する
-
+    * git cloneして、ソースコードを配置しておくこと
 * SAM CLIのアップデート
 ```sh
 # SAM CLIのアップデート
@@ -153,7 +152,7 @@ sam --version
 * Lambda実行環境用にコンパイルするためのDockerイメージ
 ```sh
 # al2-graalvm:mavenというDockerイメージを作成
-build-image.sh
+./build-image.sh
 ```
 
 * SAMビルド
