@@ -10,13 +10,31 @@
 clean:
 	mvn clean
 
-build:
+build-GetUsersFunction:
 	mvn -Pnative clean native:compile
 	cp ./target/native $(ARTIFACTS_DIR)
 	chmod 755 ./target/classes/bootstrap
 	cp ./target/classes/bootstrap $(ARTIFACTS_DIR)	
 
-sam_build:
+build-PostUsersFunction:
+	mvn -Pnative clean native:compile
+	cp ./target/native $(ARTIFACTS_DIR)
+	chmod 755 ./target/classes/bootstrap
+	cp ./target/classes/bootstrap $(ARTIFACTS_DIR)	
+
+build-GetTodoFunction:
+	mvn -Pnative clean native:compile
+	cp ./target/native $(ARTIFACTS_DIR)
+	chmod 755 ./target/classes/bootstrap
+	cp ./target/classes/bootstrap $(ARTIFACTS_DIR)	
+
+build-PostTodoFunction:
+	mvn -Pnative clean native:compile
+	cp ./target/native $(ARTIFACTS_DIR)
+	chmod 755 ./target/classes/bootstrap
+	cp ./target/classes/bootstrap $(ARTIFACTS_DIR)	
+
+build:
 	sam build
 
 validate:

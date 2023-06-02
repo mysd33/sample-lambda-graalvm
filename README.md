@@ -152,7 +152,7 @@ cd ..
 sam build
 
 # makeでもいけます
-make sam_build
+make
 ```
 
 * SAMデプロイ
