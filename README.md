@@ -157,8 +157,6 @@ build-image.sh
 
 * SAMビルド
 ```sh
-# トップのフォルダに戻る
-cd ..
 sam build
 
 # makeでもいけます
