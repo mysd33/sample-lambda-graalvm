@@ -1,11 +1,12 @@
-# Private APIでのAPIGatewayを使ったLambda/Java + Spring Boot&Spring Cloud FunctionのAWS SAMサンプルAP
+# Private APIでのAPIGatewayを使ったLambda/Java + Spring Boot&Spring Cloud FunctionのAWS SAMサンプルAP（GraalVM版）
 # 構成イメージ
-* Spring Cloud Functionを利用したAPIGateway/LambdaによるJavaアプリケーションを実装している。 また、Javaのコールドスタートの高速化対策のため、Lambda SnapStartを利用している。
+* Spring Cloud Functionを利用したAPIGateway/LambdaによるJavaアプリケーションを実装している。 また、Javaのコールドスタートの高速化対策のため、GraalVMを利用している。
     * 参考サイト
-        * https://catalog.workshops.aws/java-on-aws-lambda/en-US/03-snapstart
-        * https://maciejwalkowiak.com/blog/create-spring-cloud-function-aws-sam/
-        * https://docs.spring.io/spring-cloud-function/docs/current/reference/html/
-
+        * https://spring.pleiades.io/spring-boot/docs/current/reference/html/native-image.html
+        * https://catalog.workshops.aws/java-on-aws-lambda/en-US/02-accelerate/overview
+        * https://gvart.dev/post/2023/02/native_spring_boot_aws_lambda/
+        * https://zenn.dev/hkeisuke/articles/79f1d9cec53a2c
+        
 * API GatewayをPrivate APIで公開
     * VPC内にEC2で構築した、Bastionからアクセスする
 * LambdaからDynamoDBやRDS AuroraへのDBアクセスを実現
@@ -25,12 +26,17 @@
 
 
 ## 事前準備
-* 以下のライブラリを用いているので、EclipseのようなIDEを利用する場合には、プラグインのインストールが必要
+* IDEでのプラグインのインストール
+    * 以下のライブラリを用いているので、EclipseのようなIDEを利用する場合には、プラグインのインストールが必要
     * [Lombok](https://projectlombok.org/)
         * [Eclipseへのプラグインインストール](https://projectlombok.org/setup/eclipse)
         * [IntelliJへのプラグインインストール](https://projectlombok.org/setup/intellij)
     * [Mapstruct](https://mapstruct.org/)
         * [EclipseやIntelliJへのプラグインインストール](https://mapstruct.org/documentation/ide-support/)
+
+* Cloud9等のAmazon Linux2によるビルド環境の準備
+    * GraalVMによって生成されるアーティファクトはプラットフォームに依存し、異なるアーキテクチャまたは OSのプラットフォームでは実行できない。このため、Amazon Linux2上でのビルドが必要である。
+    * ソースコードの確認、修正は手元のWindows端末などでもよいが、ビルドやデプロイといったSAM CLIの実行を、Amazon Linux2環境としてCloud9を準備し、実施する。
 
 ## 1. IAMの作成
 ```sh
@@ -131,25 +137,34 @@ aws cloudformation create-stack --stack-name Demo-DynamoDB-Stack --template-body
 
 
 ## 10. AWS SAMでLambda/API Gatewayのデプロイ       
-* SAMビルド    
+* Cloud9上で実施すること
+
+* Lambda実行環境用にコンパイルするためのDockerイメージ
+```作成
+# al2-graalvm:mavenというDockerイメージを作成
+build-image.sh
+```
+
+* SAMビルド
 ```sh
 # トップのフォルダに戻る
 cd ..
-mvn clean package
-# Windowsでもmakeをインストールすればmakeでいけます
-make
+sam build
+
+# makeでもいけます
+make sam_build
 ```
 
 * SAMデプロイ
 ```sh
 # 1回目は
 sam deploy --guided
-# Windowsでもmakeをインストールすればmakeでいけます
+# makeでもいけます
 make deploy_guided
 
 # 2回目以降は
-sam deploy -t template.yaml
-# Windowsでもmakeをインストールすればmakeでいけます
+sam deploy
+# makeでもいけます
 make deploy
 ```
 

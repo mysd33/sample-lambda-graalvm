@@ -33,17 +33,14 @@ Conditions:
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    CodeUri: target/todo-app-1.0-aws.jar
-    Handler: org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest    
+    CodeUri: target/todo-app.zip
+    Handler: target/todo-app
     Timeout: 20    
-    Runtime: java17    
+    Runtime: provided.al2
     Architectures:
       - x86_64
     MemorySize: !Ref MemorySize        
     Tracing: !Ref TracingValue
-    # Lambda SnapStart
-    SnapStart:
-      ApplyOn: PublishedVersions
     AutoPublishAlias: snap      
     VpcConfig:
       SecurityGroupIds:
@@ -93,6 +90,8 @@ Resources:
 # Lambda Function
   GetUsersFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
     Properties:      
       FunctionName: get-user-function
       #Policies: 
@@ -111,6 +110,8 @@ Resources:
 
   PostUsersFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
     Properties:      
       FunctionName: post-user-function   
       #Policies: 
@@ -129,6 +130,8 @@ Resources:
 # Todo API
   GetTodoFunction:
     Type: AWS::Serverless::Function  
+    Metadata:
+      BuildMethod: makefile
     Properties:
       FunctionName: get-todo-function
       Policies: 
@@ -145,7 +148,9 @@ Resources:
             Method: GET
             RestApiId: !Ref TodoApi
   PostTodoFunction:
-    Type: AWS::Serverless::Function 
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
     Properties:
       FunctionName: post-todo-function
       Policies: 

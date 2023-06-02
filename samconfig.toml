@@ -4,11 +4,13 @@ version = 0.1
 
 [default]
 [default.global.parameters]
-stack_name = "todo-java-app-stack"
+stack_name = "todo-graalvm-app-stack"
 
 [default.build.parameters]
 cached = true
 parallel = true
+build_image = ["al2-graalvm:maven"]
+use_container = true
 
 [default.validate.parameters]
 lint = true
@@ -17,7 +19,7 @@ lint = true
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
 resolve_s3 = true
-s3_prefix = "todo-java-app"
+s3_prefix = "todo-graalvm-app"
 region = "ap-northeast-1"
 image_repositories = []
 parameter_overrides = "StackPrefix=\"Demo\" Stage=\"Prod\" MemorySize=\"2048\" TodoTableName=\"todo\""
