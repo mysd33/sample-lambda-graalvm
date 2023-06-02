@@ -1,0 +1,20 @@
+spring:
+  cloud:
+    function:
+      scan:
+        enabled: false
+  datasource:    
+    url: ${RDB_ENDPOINT_URL:jdbc:postgresql://localhost:5432/testdb}
+    driver-class-name: org.postgresql.Driver 
+    username: ${RDB_USER:postgres}
+    password: ${RDB_PASSWORD:password}
+              
+aws:
+  dynamodb:
+    user-tablename: ${USERS_TABLE_NAME:users}  
+    todo-tablename: ${TODO_TABLE_NAME:todo}
+
+mybatis:
+  type-aliases-package: com.example.backend.domain.model
+  configuration:
+    map-underscore-to-camel-case: true     

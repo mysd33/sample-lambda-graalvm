@@ -1,0 +1,279 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  todo-app
+
+  Sample SAM Template for todo-app
+
+Parameters:
+  StackPrefix:
+    Description: Stack Resource Name Prefix
+    Type: String
+    Default: Demo
+  Stage:
+    Type: String
+    Default: Prod
+  MemorySize:
+    Type: Number
+    MinValue: 128
+    MaxValue: 10240
+    Default: 2048 
+#  UsersTableName:
+#    Type: String
+#    Default: users    
+  TodoTableName:
+    Type: String
+    Default: todo
+  TracingValue:
+    Type: String
+    Default: Active
+Conditions:
+  TracingEnabled: !Equals [!Ref TracingValue, Active]
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    CodeUri: target/todo-app-1.0-aws.jar
+    Handler: org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest    
+    Timeout: 20    
+    Runtime: java17    
+    Architectures:
+      - x86_64
+    MemorySize: !Ref MemorySize        
+    Tracing: !Ref TracingValue
+    # Lambda SnapStart
+    SnapStart:
+      ApplyOn: PublishedVersions
+    AutoPublishAlias: snap      
+    VpcConfig:
+      SecurityGroupIds:
+        - Fn::ImportValue: !Sub ${StackPrefix}-LambdaSecurityGroup-ID
+      SubnetIds:
+        - Fn::ImportValue: !Sub ${StackPrefix}-PrivateSubnetOneId
+        - Fn::ImportValue: !Sub ${StackPrefix}-PrivateSubnetTwoId       
+    Environment:
+      Variables:
+        # Java Tiered Compilation Optimization
+        JAVA_TOOL_OPTIONS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"         
+        # For DynamoDB
+        # USERS_TABLE_NAME: !Ref UsersTableName         
+        TODO_TABLE_NAME: !Ref TodoTableName       
+        # For RDB        
+        RDB_USER: !Sub "{{resolve:secretsmanager:${StackPrefix}-RDS-Secrets:SecretString:username}}"
+        RDB_PASSWORD: !Sub "{{resolve:secretsmanager:${StackPrefix}-RDS-Secrets:SecretString:password}}"
+        RDB_ENDPOINT_URL:          
+          Fn::Join:
+            - ""
+            - - "jdbc:postgresql://"
+              - Fn::ImportValue: !Sub ${StackPrefix}-RDSProxyEndpoint
+              - ":"
+              - Fn::ImportValue: !Sub ${StackPrefix}-RDSClusterEndpointPort
+              - "/"
+              - Fn::ImportValue: !Sub ${StackPrefix}-RDSDBName
+    DeploymentPreference:
+      Type: AllAtOnce             
+      #Type: Linear10PercentEvery1Minute    
+  Api:
+    OpenApiVersion: 3.0.3  
+    EndpointConfiguration:
+      Type: PRIVATE
+      VPCEndpointIds:
+        - Fn::ImportValue: !Sub ${StackPrefix}-PrivateAPIVPCEndpoint-ID
+    MethodSettings:
+      - DataTraceEnabled: true
+        LoggingLevel: 'ERROR'
+        ResourcePath: '/*'
+        HttpMethod: '*'    
+    AccessLogSetting:
+      Format: '{ "requestId":"$context.requestId", "extendedRequestId":"$context.extendedRequestId", "ip": "$context.identity.sourceIp", "caller":"$context.identity.caller", "user":"$context.identity.user", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod", "resourcePath":"$context.resourcePath", "status":"$context.status", "protocol":"$context.protocol", "responseLength":"$context.responseLength", "integrationLatency":"$context.integration.latency", "responseLatency":"$context.responseLatency" }'
+      DestinationArn: !GetAtt ApiGwAccessLogGroup.Arn            
+    TracingEnabled: !If [TracingEnabled , true, false]
+
+Resources:
+# Lambda Function
+  GetUsersFunction:
+    Type: AWS::Serverless::Function
+    Properties:      
+      FunctionName: get-user-function
+      #Policies: 
+      #  - AmazonDynamoDBReadOnlyAccess       
+      Environment:
+        Variables:
+          # Spring Cloud Function Environment Variable for function to call
+          SPRING_CLOUD_FUNCTION_DEFINITION: userGetAPIHandler
+      Events:
+        UserService:
+          Type: Api
+          Properties:
+            Path: /users/{user_id}
+            Method: GET      
+            RestApiId: !Ref UserApi 
+
+  PostUsersFunction:
+    Type: AWS::Serverless::Function
+    Properties:      
+      FunctionName: post-user-function   
+      #Policies: 
+      #  - AmazonDynamoDBFullAccess       
+      Environment:
+        Variables:
+          # Spring Cloud Function Environment Variable for function to call
+          SPRING_CLOUD_FUNCTION_DEFINITION: userPostAPIHandler
+      Events:
+        UserService:
+          Type: Api
+          Properties:
+            Path: /users
+            Method: POST      
+            RestApiId: !Ref UserApi 
+# Todo API
+  GetTodoFunction:
+    Type: AWS::Serverless::Function  
+    Properties:
+      FunctionName: get-todo-function
+      Policies: 
+        - AmazonDynamoDBReadOnlyAccess       
+      Environment:
+        Variables:
+          # Spring Cloud Function Environment Variable for function to call
+          SPRING_CLOUD_FUNCTION_DEFINITION: todoGetAPIHandler
+      Events:
+        GetEvent:
+          Type: Api
+          Properties:            
+            Path: /todo/{todo_id}
+            Method: GET
+            RestApiId: !Ref TodoApi
+  PostTodoFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      FunctionName: post-todo-function
+      Policies: 
+        - AmazonDynamoDBFullAccess       
+      Environment:
+        Variables:
+          # Spring Cloud Function Environment Variable for function to call
+          SPRING_CLOUD_FUNCTION_DEFINITION: todoPostAPIHandler
+      Events:
+        PostEvent:
+          Type: Api
+          Properties:
+            Path: /todo
+            Method: POST
+            RestApiId: !Ref TodoApi            
+# API Gateway
+  UserApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: user-api
+      StageName: !Sub ${Stage}  
+      Auth:
+        ResourcePolicy:
+          CustomStatements: [{
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "execute-api:Invoke",
+            "Resource": [
+              !Sub "execute-api:/${Stage}/POST/users",
+              !Sub "execute-api:/${Stage}/GET/users/*",
+            ],
+            "Condition": {
+              "StringEquals": {
+                "aws:SourceVpce": { "Fn::ImportValue" : {"Fn::Sub" : "${StackPrefix}-PrivateAPIVPCEndpoint-ID" }}                
+              }                        
+            }
+          }]      
+  TodoApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: todo-api
+      StageName: !Sub ${Stage}      
+      Auth:
+        ResourcePolicy:
+          CustomStatements: [{
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "execute-api:Invoke",
+            "Resource": [
+              !Sub "execute-api:/${Stage}/POST/todo",
+              !Sub "execute-api:/${Stage}/GET/todo/*",
+            ],
+            "Condition": {
+              "StringEquals": {
+                "aws:SourceVpce": { "Fn::ImportValue" : {"Fn::Sub" : "${StackPrefix}-PrivateAPIVPCEndpoint-ID" }}                
+              }                        
+            }
+          }]       
+# IAM Role for API Gateway Account
+  APIGatewayRole:
+    Type: AWS::IAM::Role
+    Properties:      
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com      
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+# API Gateway Account Config
+  ApiGwAccountConfig:
+    Type: AWS::ApiGateway::Account
+    Properties:
+      CloudWatchRoleArn: !GetAtt APIGatewayRole.Arn
+# API Gateway Access Log Group
+  ApiGwAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/accesslog/${AWS::StackName}
+      RetentionInDays: 7
+      
+# Application Insights     
+  ApplicationResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name:
+        Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
+      ResourceQuery:
+        Type: CLOUDFORMATION_STACK_1_0
+  ApplicationInsightsMonitoring:
+    Type: AWS::ApplicationInsights::Application
+    Properties:
+      ResourceGroupName:
+        Ref: ApplicationResourceGroup
+      AutoConfigurationEnabled: 'true'
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  UserServiceApi:
+    Description: API Gateway endpoint URL for Prod stage for UserServiceFunction function
+    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/users"
+  GetUsersFunctionArn:  
+    Description:  GetUsersFunction Lambda Function ARN
+    Value: !GetAtt GetUsersFunction.Arn
+  GetUsersFunctionIamRole:
+    Description: Implicit IAM Role created for GetUsersFunction function
+    Value: !GetAtt GetUsersFunction.Arn
+  PostUsersFunctionArn:  
+    Description:  PostUsersFunction Lambda Function ARN
+    Value: !GetAtt PostUsersFunction.Arn
+  PostUsersFunctionIamRole:
+    Description: Implicit IAM Role created for PostUsersFunction function
+    Value: !GetAtt PostUsersFunction.Arn
+  TodoServiceApi:
+    Description: API Gateway endpoint URL for Prod stage for TodoServiceFunction function
+    Value: !Sub "https://${TodoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/todo"
+  GetTodoFunctionArn:  
+    Description:  GetTodoFunction Lambda Function ARN
+    Value: !GetAtt GetTodoFunction.Arn
+  GetTodoFunctionIamRole:
+    Description: Implicit IAM Role created for GetTodoFunction function
+    Value: !GetAtt GetTodoFunction.Arn
+  PostTodoFunctionArn:  
+    Description:  PostTodoFunction Lambda Function ARN
+    Value: !GetAtt PostTodoFunction.Arn
+  PostTodoFunctionIamRole:
+    Description: Implicit IAM Role created for PostTodoFunction function
+    Value: !GetAtt PostTodoFunction.Arn    
