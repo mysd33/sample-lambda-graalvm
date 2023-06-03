@@ -7,7 +7,8 @@
 
 .DEFAULT_GOAL := build
 
-BUILD_TASKS: build-GetUsersFunction build-PostUsersFunction build-GetTodoFunction build-PostTodoFunction
+BUILD_TASKS:= build-GetUsersFunction build-PostUsersFunction build-GetTodoFunction build-PostTodoFunction
+
 clean:
 	mvn clean
 
