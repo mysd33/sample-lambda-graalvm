@@ -21,11 +21,10 @@
         <aws-lambda-java-core.version>1.2.2</aws-lambda-java-core.version>
         <aws-lambda-java-events.version>3.11.1</aws-lambda-java-events.version>
         <awsxray.bom.version>2.14.0</awsxray.bom.version>
-        <org-crac.version>0.1.3</org-crac.version>
-        <!-- MapStruct -->
+        <!-- MapStruct -->        
         <m2e.apt.activation>jdt_apt</m2e.apt.activation>
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
-        <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>            
+        <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>        
     </properties>
 
     <dependencies>
@@ -45,12 +44,9 @@
           <artifactId>aws-lambda-java-events</artifactId>
           <version>${aws-lambda-java-events.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.github.crac</groupId>
-            <artifactId>org-crac</artifactId>
-            <version>${org-crac.version}</version>
-        </dependency>
+
         <!-- DynamoDB SDK -->
+        <!--
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>dynamodb</artifactId>
@@ -65,7 +61,9 @@
                 </exclusion>
             </exclusions>            
         </dependency>
+        -->
         <!-- AWS Common Runtime Http Client for DynamoDB SDK -->
+        <!--
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>aws-crt-client</artifactId>            
@@ -73,19 +71,24 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>dynamodb-enhanced</artifactId>
-        </dependency>        
+        </dependency>
+        -->        
         <!-- MyBatis -->
+        <!--
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>${mybatis-spring-boot-starter.version}</version>
         </dependency>
+        -->
         <!-- PostgreSQL -->
+        <!--
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
+        -->
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -105,6 +108,7 @@
           <scope>test</scope>
         </dependency>
         <!-- AWS X-Ray -->
+        <!--
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-xray-recorder-sdk-core</artifactId>
@@ -120,7 +124,7 @@
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-xray-recorder-sdk-sql</artifactId>
-		</dependency>
+		</dependency>-->
     </dependencies>
 
     <dependencyManagement>
@@ -142,13 +146,15 @@
                 <scope>import</scope>
             </dependency>
             <!-- AWS X-Ray -->
+            <!--
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-xray-recorder-sdk-bom</artifactId>
                 <version>${awsxray.bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>            
+            </dependency>
+            -->            
         </dependencies>
     </dependencyManagement>
 
@@ -172,7 +178,7 @@
                 <groupId>org.graalvm.buildtools</groupId>
                 <artifactId>native-maven-plugin</artifactId>
             </plugin>
-            <!-- MapStruct -->
+            <!-- MapStruct -->            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -185,7 +191,9 @@
                             <artifactId>mapstruct-processor</artifactId>
                             <version>${org.mapstruct.version}</version>
                         </path>
+            
                         <!-- other annotation processors -->
+            
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
@@ -197,8 +205,8 @@
                             <version>${lombok-mapstruct-binding.version}</version>
                         </path>
                     </annotationProcessorPaths>
-                </configuration>
-            </plugin>            
+                </configuration>                
+            </plugin>                       
       </plugins>
     </build>
 </project>
