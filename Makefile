@@ -7,16 +7,22 @@
 
 .DEFAULT_GOAL := build
 
+AP_NAME:=todo-app
 BUILD_TASKS:= build-GetUsersFunction build-PostUsersFunction build-GetTodoFunction build-PostTodoFunction
+
 
 clean:
 	mvn clean
 
 $(BUILD_TASKS):
 	mvn -Pnative clean native:compile
-	cp ./target/native $(ARTIFACTS_DIR)
-	chmod 755 ./target/classes/bootstrap
-	cp ./target/classes/bootstrap $(ARTIFACTS_DIR)	
+	echo '#!/bin/sh' > ./target/bootstrap
+	echo 'set -euo pipefail' >> ./target/bootstrap
+	echo './${AP_NAME}' >> ./target/bootstrap
+	ls ./target
+	cp ./target/${AP_NAME} $(ARTIFACTS_DIR)	
+	chmod 755 ./target/bootstrap
+	cp ./target/bootstrap $(ARTIFACTS_DIR)	
 
 build:
 	sam build
