@@ -180,6 +180,9 @@ make deploy
 * マネージドコンソールから、EC2(Bation)へSystems Manager Session Managerで接続して、curlコマンドで動作確認
     * 以下の実行例のURLを、sam deployの結果出力される実際のURLをに置き換えること
 
+* TODO:現状Userサービスでユーザ情報を登録するPOSTのAPIしか動作しない
+    * sam buildの際、GraalVMでのDockerコンテナが関数分起動してしまい、メモリを相当量消費しアウトオブメモリーになってしまうため、1関数に絞って検証したため。
+
 * Userサービスでユーザ情報を登録するPOSTのAPI実行例
     * UserサービスはRDB(RDS Proxy経由でAuroraへ)アクセスするサンプルAP
 ```sh
@@ -189,30 +192,31 @@ curl -X POST -H "Content-Type: application/json" -d '{ "user_name" : "Taro"}' ht
 {"user_id":"99bf4d94-f6a4-11ed-85ec-be18af968bc1","user_name":"Taro"}
 ```
 
-* Userサービスでユーザー情報を取得するGetのAPIの実行例（users/の後にPOSTのAPIで取得したユーザIDを指定）
-```sh
-curl https://42b4c7bk9g.execute-api.ap-northeast-1.amazonaws.com/Prod/users/99bf4d94-f6a4-11ed-85ec-be18af968bc1
+~~* Userサービスでユーザー情報を取得するGetのAPIの実行例（users/の後にPOSTのAPIで取得したユーザIDを指定）~~
+~~```sh~~
+~~curl https://42b4c7bk9g.execute-api.ap-northeast-1.amazonaws.com/Prod/users/99bf4d94-f6a4-11ed-85ec-be18af968bc1~~
 
-# 対象のユーザ情報をRDBから取得し返却
-{"user_id":"99bf4d94-f6a4-11ed-85ec-be18af968bc1","user_name":"Taro"}
-```
+~~# 対象のユーザ情報をRDBから取得し返却~~
+~~{"user_id":"99bf4d94-f6a4-11ed-85ec-be18af968bc1","user_name":"Taro"}~~
+~~```~~
 
-* Todoサービスでやることリストを登録するPOSTのAPI実行例
-    * TodoサービスはDynamoDBアクセスするサンプルAP
-```sh
-curl -X POST -H "Content-Type: application/json" -d '{ "todo_title" : "ミルクを買う"}' https://civuzxdd14.execute-api.ap-northeast-1.amazonaws.com/Prod/todo
+~~* Todoサービスでやることリストを登録するPOSTのAPI実行例~~
+~~    * TodoサービスはDynamoDBアクセスするサンプルAP~~
+~~```sh~~
+~~curl -X POST -H "Content-Type: application/json" -d '{ "todo_title" : "ミルクを買う"}' https://civuzxdd14.execute-api.ap-northeast-1.amazonaws.com/Prod/todo~~
 
-# 登録結果を返却
-{"todo_id":"04a14ad3-f6a5-11ed-b40f-f2ead45b980a","todo_title":"ミルクを買う"}
-```
+~~# 登録結果を返却~~
+~~{"todo_id":"04a14ad3-f6a5-11ed-b40f-f2ead45b980a","todo_title":"ミルクを買う"}~~
+~~```~~
 
-* Todoサービスでやること（TODO）を取得するGetのAPI実行例（todo/の後にPOSTのAPIで取得したTodo IDを指定）
-```sh
-curl https://civuzxdd14.execute-api.ap-northeast-1.amazonaws.com/Prod/todo/04a14ad3-f6a5-11ed-b40f-f2ead45b980a
+~~* Todoサービスでやること（TODO）を取得するGetのAPI実行例（todo/の後にPOSTのAPIで取得したTodo IDを指定）~~
+~~```sh~~
+~~curl https://civuzxdd14.execute-api.ap-northeast-1.amazonaws.com/Prod/todo/04a14ad3-f6a5-11ed-b40f-f2ead45b980a~~
 
-# 対象のやることをDyanamoDBから取得し返却
-{"todo_id":"04a14ad3-f6a5-11ed-b40f-f2ead45b980a","todo_title":"ミルクを買う"}
-```
+~~# 対象のやることをDyanamoDBから取得し返却~~
+~~{"todo_id":"04a14ad3-f6a5-11ed-b40f-f2ead45b980a","todo_title":"ミルクを買う"}~~
+~~```~~
+
 ## 12. SAMのCloudFormationスタック削除
 ```sh
 sam delete
