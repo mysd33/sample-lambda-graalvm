@@ -137,8 +137,16 @@ aws cloudformation create-stack --stack-name Demo-DynamoDB-Stack --template-body
 
 
 ## 10. AWS SAMでLambda/API Gatewayのデプロイ       
-* Cloud9上で以下実施する
-    * git cloneして、ソースコードを配置しておくこと
+* Cloud9で環境の作成
+    * sam buildで、コンテナを使用したGraalVMのビルドにメモリを使用するため、t3.large（8GiBメモリ）以上がのぞましい
+
+* Cloud9の環境で以降を実施
+
+* git cloneで、ソースコードの取得
+```sh
+git clone https://xxxxxx/sample-lambda-graalvm
+```
+
 * SAM CLIのアップデート
 ```sh
 # SAM CLIのアップデート
@@ -149,9 +157,10 @@ sudo ./sam-installation/install --update
 sam --version
 ```
 
-* Lambda実行環境用にコンパイルするためのDockerイメージ
+* Lambda実行環境用にコンパイルするためのDockerイメージの作成
 ```sh
 # al2-graalvm:mavenというDockerイメージを作成
+cd sample-lambda-graalvm
 ./build-image.sh
 ```
 
