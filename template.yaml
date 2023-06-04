@@ -56,17 +56,17 @@ Globals:
         # USERS_TABLE_NAME: !Ref UsersTableName         
         TODO_TABLE_NAME: !Ref TodoTableName       
         # For RDB        
-        RDB_USER: !Sub "{{resolve:secretsmanager:${StackPrefix}-RDS-Secrets:SecretString:username}}"
-        RDB_PASSWORD: !Sub "{{resolve:secretsmanager:${StackPrefix}-RDS-Secrets:SecretString:password}}"
-        RDB_ENDPOINT_URL:          
-          Fn::Join:
-            - ""
-            - - "jdbc:postgresql://"
-              - Fn::ImportValue: !Sub ${StackPrefix}-RDSProxyEndpoint
-              - ":"
-              - Fn::ImportValue: !Sub ${StackPrefix}-RDSClusterEndpointPort
-              - "/"
-              - Fn::ImportValue: !Sub ${StackPrefix}-RDSDBName
+#        RDB_USER: !Sub "{{resolve:secretsmanager:${StackPrefix}-RDS-Secrets:SecretString:username}}"
+#        RDB_PASSWORD: !Sub "{{resolve:secretsmanager:${StackPrefix}-RDS-Secrets:SecretString:password}}"
+#        RDB_ENDPOINT_URL:          
+#          Fn::Join:
+#            - ""
+#            - - "jdbc:postgresql://"
+#              - Fn::ImportValue: !Sub ${StackPrefix}-RDSProxyEndpoint
+#              - ":"
+#              - Fn::ImportValue: !Sub ${StackPrefix}-RDSClusterEndpointPort
+#              - "/"
+#              - Fn::ImportValue: !Sub ${StackPrefix}-RDSDBName
     DeploymentPreference:
       Type: AllAtOnce             
       #Type: Linear10PercentEvery1Minute    
