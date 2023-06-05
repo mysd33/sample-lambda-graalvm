@@ -1,7 +1,10 @@
 # Private APIでのAPIGatewayを使ったLambda/Java + Spring Boot&Spring Cloud FunctionのAWS SAMサンプルAP（GraalVM版）
-# 構成イメージ
-* 現在、GraalVMの場合、RDB（RDS Aurora）アクセス対応、X-Ray対応もうまく出来ていない状況。ビルドが通るかもデリケートで、情報も少ないため、SnapStart対応のように簡単にはいかず、Spring Bootや周辺ライブラリを使ってのGraalVM実装は正直、おすすめしない。
 
+* GraalVMの場合、リフレクションが使えないため、ビルドが通るか苦労する、実行時にも予期せぬエラー出る等、トライアンドエラーで進めて動くようになんとかするといったデリケートさで、トラブルがあってもインターネット上の情報も少ない。
+* 現状、このサンプルAPも、RDB（RDS Aurora）アクセス対応、X-Ray対応もうまく出来ていない状況。その他、DynamoDBEnhancedClientでのTableSchema.forBeanが使えない、AWS CRT等使えないので、回避する実装にするといったこともあったりした。
+* SnapStart対応のような、template.yamlで有効化の設定をすれば、基本的には、通常のSpringBootアプリケーションの作り方で動かせるという感じで、簡単にはいかず、Spring Bootや周辺ライブラリを使ってのGraalVM実装は、正直、おすすめしない。GraalVMを使うなら、極力フレームワークを使わず、必要最低限のライブラリのみを使う実装方式をおすすめする。
+
+# 構成イメージ
 * Spring Cloud Functionを利用したAPIGateway/LambdaによるJavaアプリケーションを実装している。 また、Javaのコールドスタートの高速化対策のため、GraalVMを利用している。
     * 参考サイト
         * https://spring.pleiades.io/spring-boot/docs/current/reference/html/native-image.html

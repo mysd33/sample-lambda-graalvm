@@ -33,6 +33,8 @@ public class DynamoDBProdConfig {
                 .build();
     }
 
+    // GraalVMだとAWS CRTが使えない
+    
     /**
      * DynamoDBに接続するDynamoDBAyncClient
      */

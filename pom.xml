@@ -54,6 +54,7 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>dynamodb</artifactId>
+            <!-- GraalVMだとAWS CRTが使えない -->
             <!--
             <exclusions>
                 <exclusion>
@@ -67,6 +68,8 @@
             </exclusions>
             -->            
         </dependency>
+        
+        <!-- GraalVMだとAWS CRTが使えない -->
         <!-- AWS Common Runtime Http Client for DynamoDB SDK -->
         <!--
         <dependency>
