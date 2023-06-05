@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 //import org.springframework.transaction.annotation.Transactional;
 
-import com.amazonaws.xray.spring.aop.XRayEnabled;
+//import com.amazonaws.xray.spring.aop.XRayEnabled;
 import com.example.backend.domain.model.User;
 import com.example.backend.domain.repository.UserRepository;
 
@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
  * UserServiceの実装クラス
  *
  */
-@XRayEnabled
+//@XRayEnabled
 //@Transactional
 @Service
 @RequiredArgsConstructor

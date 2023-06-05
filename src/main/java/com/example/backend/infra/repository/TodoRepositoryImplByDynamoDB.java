@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-import com.amazonaws.xray.spring.aop.XRayEnabled;
+//import com.amazonaws.xray.spring.aop.XRayEnabled;
 import com.example.backend.domain.model.Todo;
 import com.example.backend.domain.repository.TodoRepository;
 
@@ -22,7 +22,7 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
  * DynamoDBにアクセスするTodoRepository実装クラス
  *
  */
-@XRayEnabled
+//@XRayEnabled
 @Repository
 @RequiredArgsConstructor
 public class TodoRepositoryImplByDynamoDB implements TodoRepository {

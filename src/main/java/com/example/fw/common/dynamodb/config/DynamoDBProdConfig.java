@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.amazonaws.xray.interceptors.TracingInterceptor;
+//import com.amazonaws.xray.interceptors.TracingInterceptor;
 
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.http.crt.AwsCrtAsyncHttpClient;
@@ -21,7 +21,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 public class DynamoDBProdConfig {
 
     /**
-     * DynamoDB Localに接続するDynamoDBClient
+     * DynamoDBに接続するDynamoDBClient
      */
     /*
     @Bean
@@ -35,15 +35,15 @@ public class DynamoDBProdConfig {
     }*/
 
     /**
-     * DynamoDB Localに接続するDynamoDBAyncClient
+     * DynamoDBに接続するDynamoDBAyncClient
      */
     @Bean
     public DynamoDbAsyncClient dynamoDbAsyncClient(DynamoDBConfigurationProperties dynamoDBConfigurationProperties) {
         Region region = Region.of(dynamoDBConfigurationProperties.getRegion());
         return DynamoDbAsyncClient.builder().region(region)
                 // 個別にDynamoDBへのAWS SDKの呼び出しをトレーシングできるように設定
-                .overrideConfiguration(
-                        ClientOverrideConfiguration.builder().addExecutionInterceptor(new TracingInterceptor()).build())
+                //.overrideConfiguration(
+                //        ClientOverrideConfiguration.builder().addExecutionInterceptor(new TracingInterceptor()).build())
                 // CRT Clientを設定
                 .httpClientBuilder(AwsCrtAsyncHttpClient.builder())
                 .build();

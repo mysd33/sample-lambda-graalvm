@@ -1,30 +1,26 @@
 # Private APIでのAPIGatewayを使ったLambda/Java + Spring Boot&Spring Cloud FunctionのAWS SAMサンプルAP（GraalVM版）
 # 構成イメージ
+* 現在、GraalVMの場合、RDB（RDS Aurora）アクセス対応、X-Ray対応もうまく出来ていない状況。ビルドが通るかもデリケートで、情報も少ないため、SnapStart対応のように簡単にはいかず、Spring Bootや周辺ライブラリを使ってのGraalVM実装は正直、おすすめしない。
+
 * Spring Cloud Functionを利用したAPIGateway/LambdaによるJavaアプリケーションを実装している。 また、Javaのコールドスタートの高速化対策のため、GraalVMを利用している。
     * 参考サイト
         * https://spring.pleiades.io/spring-boot/docs/current/reference/html/native-image.html
         * https://catalog.workshops.aws/java-on-aws-lambda/en-US/02-accelerate/overview
         * https://gvart.dev/post/2023/02/native_spring_boot_aws_lambda/
         * https://zenn.dev/hkeisuke/articles/79f1d9cec53a2c
-        
+
 * API GatewayをPrivate APIで公開
     * VPC内にEC2で構築した、Bastionからアクセスする
 * LambdaからDynamoDBやRDS AuroraへのDBアクセスを実現
     * LambdaはVPC内Lambdaとして、RDS Aurora（RDS Proxy経由）でのアクセスも可能としている
-    
-* TODO: 現在、GraalVMの場合、RDB（RDS AuroraへのDBアクセス）がうまく出来ていない状況
+
 
 ![構成イメージ](image/demo.png)
 
 * X-Rayによる可視化
     * API Gateway、Lambdaにおいて、X-Rayによる可視化にも対応している    
-    * RDB(RDS Aurora)へのアクセス、DynamoDBへのアクセスのトレースにも対応    
-        * コールドスタートの例
-            * Initializationが動作する代わりに、スナップショットをRestoreする処理が動くのが分かる
-![X-Rayの可視化のコールドスタート例](image/xray.png)
-        * ウォームスタートの例
-            * Restoreが発生せず処理しているのが分かる
-![X-Rayの可視化のウォームスタート例](image/xray_warmstart.png)
+~~    * RDB(RDS Aurora)へのアクセス、DynamoDBへのアクセスのトレースにも対応    ~~
+~~![X-Rayの可視化のコールドスタート例](image/xray.png)~~
 
 
 ## 事前準備
