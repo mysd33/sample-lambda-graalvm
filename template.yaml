@@ -56,17 +56,17 @@ Globals:
         # USERS_TABLE_NAME: !Ref UsersTableName         
         TODO_TABLE_NAME: !Ref TodoTableName       
         # For RDB        
-#        RDB_USER: !Sub "{{resolve:secretsmanager:${StackPrefix}-RDS-Secrets:SecretString:username}}"
-#        RDB_PASSWORD: !Sub "{{resolve:secretsmanager:${StackPrefix}-RDS-Secrets:SecretString:password}}"
-#        RDB_ENDPOINT_URL:          
-#          Fn::Join:
-#            - ""
-#            - - "jdbc:postgresql://"
-#              - Fn::ImportValue: !Sub ${StackPrefix}-RDSProxyEndpoint
-#              - ":"
-#              - Fn::ImportValue: !Sub ${StackPrefix}-RDSClusterEndpointPort
-#              - "/"
-#              - Fn::ImportValue: !Sub ${StackPrefix}-RDSDBName
+        RDB_USER: !Sub "{{resolve:secretsmanager:${StackPrefix}-RDS-Secrets:SecretString:username}}"
+        RDB_PASSWORD: !Sub "{{resolve:secretsmanager:${StackPrefix}-RDS-Secrets:SecretString:password}}"
+        RDB_ENDPOINT_URL:          
+          Fn::Join:
+            - ""
+            - - "jdbc:postgresql://"
+              - Fn::ImportValue: !Sub ${StackPrefix}-RDSProxyEndpoint
+              - ":"
+              - Fn::ImportValue: !Sub ${StackPrefix}-RDSClusterEndpointPort
+              - "/"
+              - Fn::ImportValue: !Sub ${StackPrefix}-RDSDBName
     DeploymentPreference:
       Type: AllAtOnce             
       #Type: Linear10PercentEvery1Minute    
@@ -147,25 +147,25 @@ Resources:
 #            Path: /todo/{todo_id}
 #            Method: GET
 #            RestApiId: !Ref TodoApi
-#  PostTodoFunction:
-#    Type: AWS::Serverless::Function
-#    Metadata:
-#      BuildMethod: makefile
-#    Properties:
-#      FunctionName: post-todo-function
-#      Policies: 
-#        - AmazonDynamoDBFullAccess       
-#      Environment:
-#        Variables:
-#          # Spring Cloud Function Environment Variable for function to call
-#          SPRING_CLOUD_FUNCTION_DEFINITION: todoPostAPIHandler
-#      Events:
-#        PostEvent:
-#          Type: Api
-#          Properties:
-#            Path: /todo
-#            Method: POST
-#            RestApiId: !Ref TodoApi            
+  PostTodoFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      FunctionName: post-todo-function
+      Policies: 
+        - AmazonDynamoDBFullAccess       
+      Environment:
+        Variables:
+          # Spring Cloud Function Environment Variable for function to call
+          SPRING_CLOUD_FUNCTION_DEFINITION: todoPostAPIHandler
+      Events:
+        PostEvent:
+          Type: Api
+          Properties:
+            Path: /todo
+            Method: POST
+            RestApiId: !Ref TodoApi            
 # API Gateway
   UserApi:
     Type: AWS::Serverless::Api
@@ -188,27 +188,27 @@ Resources:
               }                        
             }
           }]      
-#  TodoApi:
-#    Type: AWS::Serverless::Api
-#    Properties:
-#      Name: todo-api
-#      StageName: !Sub ${Stage}      
-#      Auth:
-#        ResourcePolicy:
-#          CustomStatements: [{
-#            "Effect": "Allow",
-#            "Principal": "*",
-#            "Action": "execute-api:Invoke",
-#            "Resource": [
-#              !Sub "execute-api:/${Stage}/POST/todo",
-#              !Sub "execute-api:/${Stage}/GET/todo/*",
-#            ],
-#            "Condition": {
-#              "StringEquals": {
-#                "aws:SourceVpce": { "Fn::ImportValue" : {"Fn::Sub" : "${StackPrefix}-PrivateAPIVPCEndpoint-ID" }}                
-#              }                        
-#            }
-#          }]       
+  TodoApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: todo-api
+      StageName: !Sub ${Stage}      
+      Auth:
+        ResourcePolicy:
+          CustomStatements: [{
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "execute-api:Invoke",
+            "Resource": [
+              !Sub "execute-api:/${Stage}/POST/todo",
+              !Sub "execute-api:/${Stage}/GET/todo/*",
+            ],
+            "Condition": {
+              "StringEquals": {
+                "aws:SourceVpce": { "Fn::ImportValue" : {"Fn::Sub" : "${StackPrefix}-PrivateAPIVPCEndpoint-ID" }}                
+              }                        
+            }
+          }]       
 
 # IAM Role for API Gateway Account
   APIGatewayRole:
@@ -268,18 +268,18 @@ Outputs:
   PostUsersFunctionIamRole:
     Description: Implicit IAM Role created for PostUsersFunction function
     Value: !GetAtt PostUsersFunction.Arn
-#  TodoServiceApi:
-#    Description: API Gateway endpoint URL for Prod stage for TodoServiceFunction function
-#    Value: !Sub "https://${TodoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/todo"
+  TodoServiceApi:
+    Description: API Gateway endpoint URL for Prod stage for TodoServiceFunction function
+    Value: !Sub "https://${TodoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/todo"
 #  GetTodoFunctionArn:  
 #    Description:  GetTodoFunction Lambda Function ARN
 #    Value: !GetAtt GetTodoFunction.Arn
 #  GetTodoFunctionIamRole:
 #    Description: Implicit IAM Role created for GetTodoFunction function
 #    Value: !GetAtt GetTodoFunction.Arn
-#  PostTodoFunctionArn:  
-#    Description:  PostTodoFunction Lambda Function ARN
-#    Value: !GetAtt PostTodoFunction.Arn
-#  PostTodoFunctionIamRole:
-#    Description: Implicit IAM Role created for PostTodoFunction function
-#    Value: !GetAtt PostTodoFunction.Arn    
+  PostTodoFunctionArn:  
+    Description:  PostTodoFunction Lambda Function ARN
+    Value: !GetAtt PostTodoFunction.Arn
+  PostTodoFunctionIamRole:
+    Description: Implicit IAM Role created for PostTodoFunction function
+    Value: !GetAtt PostTodoFunction.Arn    
