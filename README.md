@@ -2,6 +2,7 @@
 
 * GraalVMの場合、リフレクションが使えない。SpringBootは、GraalVM対応しているとはいえ、それ以外にもさまざまなライブラリを使っているため、ビルドが通るように設定するのに苦労する。また、実行時にも予期せぬエラー出る等、トライアンドエラーで進めてなんとか動くようにするといったデリケートさで、トラブルがあってもインターネット上の情報も少ない。
 * 現状、このサンプルAPも、mybatisによるRDB（RDS Aurora）アクセス対応、X-Ray本格対応が、出来ていないし、解決策が見つかっていない状況。その他、DynamoDBEnhancedClientでのTableSchema.forBeanが使えない、AWS CRT等使えないので、回避するため、使用しない実装に変えるといったこともあった。
+* また、GraalVMはネイティブビルドであり、Lambdaの動作環境（provided.al2）を同じビルド環境でのビルドが推奨されるため、sam buildでは、AmazonLinux2上でDockerコンテナを使ってのnative-imageビルドを実施する。この時、template.ymlに定義したFunction数分、コンテナが起動し、そのコンテナが1コンテナあたり、相当量のメモリを消費するため、同じtemplate.ymlにFunctionを多く定義すると1度に多くのコンテナが起動しアウトオブメモリが発生しビルドエラーとなってしまう。CPUパワーも結構使用しているように見え、潤沢なメモリやCPUをもったCIのリソースが必要になってしまう。
 * SnapStart対応では、template.yamlで有効化の設定をすれば、基本的には、通常のSpringBootアプリケーションの作り方で動かせるといった導入が簡単な感じがあったが、GraalVMの場合は簡単にはいかず、Spring Bootや周辺ライブラリを使ってのGraalVM実装は、正直、おすすめしない。GraalVMを使うなら、極力フレームワークを使わず、必要最低限のライブラリのみを使う実装方式をおすすめする。
 
 # 構成イメージ
@@ -152,7 +153,12 @@ aws cloudformation create-stack --stack-name Demo-DynamoDB-Stack --template-body
 * Cloud9で環境の作成
     * sam buildで、コンテナを使用したGraalVMのビルドにメモリを使用するため、t3.xlarge（16GiBメモリ）以上がのぞましい
     
-    * TODO: sam buildすると、template.yamlで定義したFunction数分、GraalVMのビルド用のコンテナが起動し、メモリを大量に消費する(7GB程度)。このため、本来4つのFunction/APIを実装しているが、メモリ16Gibで収まるよう、現状、2つのFunctionのみ動作するようにtemplate.yaml上、コメントアウトしている。
+    * TODO: sam buildすると、template.yamlで定義したFunction数分、GraalVMのビルド用のコンテナが起動し、native-imageビルド時にメモリを大量に消費する(自分の環境では7GB程度)。このため、本来4つのFunction/APIを実装しているが、メモリ16GiBで収まるよう、現状、2つのFunctionのみ動作するようにtemplate.yaml上、コメントアウトしている。
+    * TODO: native-imageビルド時のメモリを抑える設定としてpom.xmlの>native-maven-pluginのbuildArgsに以下を追加すると、多少抑えられそう（以下は、3GBに抑える例だが、実際docker statsすると4GB程度まで利用していそう）
+    ```xml
+    <arg>--no-server</arg>
+    <arg>-J-Xmx3G</arg>
+    ```    
 
 * Cloud9の環境で以降を実施
 
@@ -210,7 +216,7 @@ make deploy
     * 以下の実行例のURLを、sam deployの結果出力される実際のURLをに置き換えること
 
 * TODO: 現状、Userサービスでユーザ情報を登録するPOSTのAPIと、Todoサービスでやることリストを登録するPOSTのAPIの2つのAPIしか動作しない
-    * template.yamlで定義したFunctionごとに、ビルド用のコンテナが起動し、メモリを大量に消費する(7GB程度)。このため、本来4つのFunction/APIを実装しているが、template.yaml上、現状、2つのFunctionのみ動作するようにコメントアウトしている
+    * template.yamlで定義したFunctionごとに、ビルド用のコンテナが起動し、メモリを大量に消費するため、本来4つのFunction/APIを実装しているが、template.yaml上、現状、2つのFunctionのみ動作するようにコメントアウトしている
 
 * Userサービスでユーザ情報を登録するPOSTのAPI実行例
     * UserサービスはRDB(RDS Proxy経由でAuroraへ)アクセスするサンプルAP
