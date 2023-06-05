@@ -14,6 +14,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import static software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.primaryPartitionKey;
 
 /**
  * DynamoDBにアクセスするUserRepository実装クラス
@@ -33,6 +34,7 @@ public class UserRepositoryImplByDynamoDB implements UserRepository {
     // （参考）DynamoDbEnhancedClientの実装例
     // https://docs.aws.amazon.com/ja_jp/sdk-for-java/latest/developer-guide/examples-dynamodb-enhanced.html
     // https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/javav2/example_code/dynamodb/src/main/java/com/example/dynamodb
+    
 
     @Override
     public boolean insert(User user) {
@@ -57,8 +59,27 @@ public class UserRepositoryImplByDynamoDB implements UserRepository {
         
     }
 
+    
     private DynamoDbTable<UserTableItem> createDynamoDBClient() {
     //private DynamoDbAsyncTable<UserTableItem> createDynamoDBClient() {
-        return enhancedClient.table(userTableName, TableSchema.fromBean(UserTableItem.class));
+                
+        //return enhancedClient.table(userTableName, TableSchema.fromBean(UserTableItem.class));
+
+        //TODO: GraalVMだと、DynamoDbEnhancedClientのTableSchema.fromBeanが動作しない
+        //https://github.com/oracle/graal/issues/3386
+        //回避策としてビルダーを使ってスキーマ定義
+        TableSchema<UserTableItem> tableSchema = TableSchema.builder(UserTableItem.class)
+                .newItemSupplier(UserTableItem::new)
+                .addAttribute(String.class, a -> a.name("user_id")
+                        .getter(UserTableItem::getUserId)
+                        .setter(UserTableItem::setUserId)
+                        .tags(primaryPartitionKey()))
+                .addAttribute(String.class, a -> a.name("name")
+                        .getter(UserTableItem::getName)
+                        .setter(UserTableItem::setName))                        
+                .build();
+        
+        
+        return enhancedClient.table(userTableName, tableSchema);
     }
 }

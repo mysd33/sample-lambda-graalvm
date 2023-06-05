@@ -1,5 +1,7 @@
 package com.example.backend.infra.repository;
 
+import static software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.primaryPartitionKey;
+
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +39,10 @@ public class TodoRepositoryImplByDynamoDB implements TodoRepository {
     // https://docs.aws.amazon.com/ja_jp/sdk-for-java/latest/developer-guide/examples-dynamodb-enhanced.html
     // https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/javav2/example_code/dynamodb/src/main/java/com/example/dynamodb
 
+    //TODO: GraalVMだと、DynamoDbEnhancedClientも動作しない
+    //https://github.com/oracle/graal/issues/3386
+    
+    
     @Override
     public boolean insert(Todo todo) {
         todo.setTodoId(UUID.randomUUID().toString());
@@ -61,7 +67,23 @@ public class TodoRepositoryImplByDynamoDB implements TodoRepository {
 
     private DynamoDbTable<TodoTableItem> createDynamoDBClient() {
     //private DynamoDbAsyncTable<TodoTableItem> createDynamoDBClient() {
-        return enhancedClient.table(todoTableName, TableSchema.fromBean(TodoTableItem.class));
+        
+        //return enhancedClient.table(todoTableName, TableSchema.fromBean(TodoTableItem.class));
+
+        //TODO: GraalVMだと、DynamoDbEnhancedClientのTableSchema.fromBeanが動作しない
+        //https://github.com/oracle/graal/issues/3386
+        //回避策としてビルダーを使ってスキーマ定義
+        TableSchema<TodoTableItem> tableSchema = TableSchema.builder(TodoTableItem.class)
+                .newItemSupplier(TodoTableItem::new)
+                .addAttribute(String.class, a -> a.name("todo_id")
+                        .getter(TodoTableItem::getTodoId)
+                        .setter(TodoTableItem::setTodoId)
+                        .tags(primaryPartitionKey()))
+                .addAttribute(String.class, a -> a.name("title")
+                        .getter(TodoTableItem::getTitle)
+                        .setter(TodoTableItem::setTitle))                        
+                .build();
+        return enhancedClient.table(todoTableName, tableSchema);
     }
 
 }
