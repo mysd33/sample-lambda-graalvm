@@ -177,6 +177,13 @@
             <plugin>
                 <groupId>org.graalvm.buildtools</groupId>
                 <artifactId>native-maven-plugin</artifactId>
+                <configuration>
+                    <buildArgs>
+                        <arg>--trace-class-initialization=org.apache.commons.logging.LogFactory,org.apache.commons.logging.LogFactoryService</arg>
+                        <arg>-H:+ReportExceptionStackTraces</arg>
+                        <arg>--initialize-at-build-time=org.apache.commons.logging.LogFactory,org.apache.commons.logging.LogFactoryService</arg>
+                    </buildArgs>                    
+                </configuration>                
             </plugin>
             <!-- MapStruct -->            
             <plugin>

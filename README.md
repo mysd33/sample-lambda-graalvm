@@ -11,6 +11,8 @@
     * VPC内にEC2で構築した、Bastionからアクセスする
 * LambdaからDynamoDBやRDS AuroraへのDBアクセスを実現
     * LambdaはVPC内Lambdaとして、RDS Aurora（RDS Proxy経由）でのアクセスも可能としている
+    
+* TODO: 現在、GraalVMの場合、RDB（RDS AuroraへのDBアクセス）がうまく出来ていない状況
 
 ![構成イメージ](image/demo.png)
 
@@ -74,7 +76,7 @@ aws cloudformation create-stack --stack-name Demo-NATGW-Stack --template-body fi
 ```
 
 ## 6. RDS Aurora Serverless v2 for PostgreSQL、SecretsManager、RDS Proxy作成
-* TODO: 現状のAPだとRDB不要
+* TODO: 現状のAPだとRDB対応できていないため作成不要
 
 * リソース作成に少し時間がかかる。(20分程度)
 ```sh
@@ -93,7 +95,7 @@ aws cloudformation create-stack --stack-name Demo-Bastion-Stack --template-body 
     * 「--parameters ParameterKey=KeyPairName,ParameterValue=myKeyPair」
 
 ## 8. RDBのテーブル作成
-* TODO: 現状のAPだとRDB不要
+* TODO: 現状のAPだとRDB対応できていないため作成不要
 
 * マネージドコンソールからEC2にセッションマネージャで接続し、Bastionにログインする。psqlをインストールし、DB接続する。
     * 以下参考に、Bastionにpsqlをインストールするとよい
@@ -201,6 +203,9 @@ make deploy
 
 * Userサービスでユーザ情報を登録するPOSTのAPI実行例
     * UserサービスはRDB(RDS Proxy経由でAuroraへ)アクセスするサンプルAP
+
+    * TODO: 現状のAPだとRDB対応できていないためDynamoDBアクセスするサンプルAPに変更している
+
 ```sh
 curl -X POST -H "Content-Type: application/json" -d '{ "user_name" : "Taro"}' https://42b4c7bk9g.execute-api.ap-northeast-1.amazonaws.com/Prod/users
 
