@@ -13,8 +13,8 @@
 
 * API GatewayをPrivate APIで公開
     * VPC内にEC2で構築した、Bastionからアクセスする
-* LambdaからDynamoDBやRDS AuroraへのDBアクセスを実現
-    * LambdaはVPC内Lambdaとして、RDS Aurora（RDS Proxy経由）でのアクセスも可能としている
+* LambdaからDynamoDB~~やRDS Aurora~~へのDBアクセスを実現
+    ~~* LambdaはVPC内Lambdaとして、RDS Aurora（RDS Proxy経由）でのアクセスも可能としている~~
     * TODO: RDB(RDS Aurora)へのアクセスに対応できていない。
 
 
