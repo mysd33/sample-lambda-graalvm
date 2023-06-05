@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import com.example.backend.domain.model.Todo;
 import com.example.backend.domain.repository.TodoRepository;
 
-@Repository
+//@Repository
 public class TodoRepositoryStub implements TodoRepository {
 
     @Override
