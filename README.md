@@ -138,7 +138,9 @@ aws cloudformation create-stack --stack-name Demo-DynamoDB-Stack --template-body
 
 ## 10. AWS SAMでLambda/API Gatewayのデプロイ       
 * Cloud9で環境の作成
-    * sam buildで、コンテナを使用したGraalVMのビルドにメモリを使用するため、t3.large（8GiBメモリ）以上がのぞましい
+    * sam buildで、コンテナを使用したGraalVMのビルドにメモリを使用するため、t3.xlarge（16GiBメモリ）以上がのぞましい
+        * template.yamlで定義したFunctionごとに、ビルド用のコンテナが起動し、メモリを大量に消費する(推定4GB以上)
+        。このため、本来4つのFunction/APIを実装しているが、template.yaml上、現状、2つのFunctionのみ動作するようにコメントアウトしている。
 
 * Cloud9の環境で以降を実施
 
