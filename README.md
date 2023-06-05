@@ -1,8 +1,8 @@
 # Private APIでのAPIGatewayを使ったLambda/Java + Spring Boot&Spring Cloud FunctionのAWS SAMサンプルAP（GraalVM版）
 
-* GraalVMの場合、リフレクションが使えないため、ビルドが通るか苦労する、実行時にも予期せぬエラー出る等、トライアンドエラーで進めて動くようになんとかするといったデリケートさで、トラブルがあってもインターネット上の情報も少ない。
-* 現状、このサンプルAPも、RDB（RDS Aurora）アクセス対応、X-Ray本格対応もうまく出来ていない状況。その他、DynamoDBEnhancedClientでのTableSchema.forBeanが使えない、AWS CRT等使えないので、回避する実装にするといったこともあったりした。
-* SnapStart対応のような、template.yamlで有効化の設定をすれば、基本的には、通常のSpringBootアプリケーションの作り方で動かせるという感じで、簡単にはいかず、Spring Bootや周辺ライブラリを使ってのGraalVM実装は、正直、おすすめしない。GraalVMを使うなら、極力フレームワークを使わず、必要最低限のライブラリのみを使う実装方式をおすすめする。
+* GraalVMの場合、リフレクションが使えない。SpringBootは、GraalVM対応しているとはいえ、それ以外にもさまざまなライブラリを使っているため、ビルドが通るように設定するのに苦労する。また、実行時にも予期せぬエラー出る等、トライアンドエラーで進めてなんとか動くようにするといったデリケートさで、トラブルがあってもインターネット上の情報も少ない。
+* 現状、このサンプルAPも、RDB（RDS Aurora）アクセス対応、X-Ray本格対応が、出来ていないし、解決策が見つかっていない状況。その他、DynamoDBEnhancedClientでのTableSchema.forBeanが使えない、AWS CRT等使えないので、回避するため、使用しない実装に変えるといったこともあった。
+* SnapStart対応では、template.yamlで有効化の設定をすれば、基本的には、通常のSpringBootアプリケーションの作り方で動かせるといった導入が簡単な感じがあったが、GraalVMの場合は簡単にはいかず、Spring Bootや周辺ライブラリを使ってのGraalVM実装は、正直、おすすめしない。GraalVMを使うなら、極力フレームワークを使わず、必要最低限のライブラリのみを使う実装方式をおすすめする。
 
 # 構成イメージ
 * Spring Cloud Functionを利用したAPIGateway/LambdaによるJavaアプリケーションを実装している。 また、Javaのコールドスタートの高速化対策のため、GraalVMを利用している。
@@ -10,12 +10,12 @@
         * https://spring.pleiades.io/spring-boot/docs/current/reference/html/native-image.html
         * https://catalog.workshops.aws/java-on-aws-lambda/en-US/02-accelerate/overview
         * https://gvart.dev/post/2023/02/native_spring_boot_aws_lambda/
-        * https://zenn.dev/hkeisuke/articles/79f1d9cec53a2c
 
 * API GatewayをPrivate APIで公開
     * VPC内にEC2で構築した、Bastionからアクセスする
 * LambdaからDynamoDBやRDS AuroraへのDBアクセスを実現
     * LambdaはVPC内Lambdaとして、RDS Aurora（RDS Proxy経由）でのアクセスも可能としている
+    * TODO: RDB(RDS Aurora)へのアクセスに対応できていない。
 
 
 ![構成イメージ](image/demo.png)
@@ -82,11 +82,11 @@ aws cloudformation create-stack --stack-name Demo-NATGW-Stack --template-body fi
 ## 6. RDS Aurora Serverless v2 for PostgreSQL、SecretsManager、RDS Proxy作成
 * TODO: 現状のAPだとRDB対応できていないため作成不要
 
-* リソース作成に少し時間がかかる。(20分程度)
-```sh
-aws cloudformation validate-template --template-body file://cfn-rds.yaml
-aws cloudformation create-stack --stack-name Demo-RDS-Stack --template-body file://cfn-rds.yaml --parameters ParameterKey=DBUsername,ParameterValue=postgres ParameterKey=DBPassword,ParameterValue=password
-```
+~~* リソース作成に少し時間がかかる。(20分程度)~~
+~~```sh~~
+~~aws cloudformation validate-template --template-body file://cfn-rds.yaml~~
+~~aws cloudformation create-stack --stack-name Demo-RDS-Stack --template-body file://cfn-rds.yaml --parameters ParameterKey=DBUsername,ParameterValue=postgres ParameterKey=DBPassword,ParameterValue=password~~
+~~```~~
 
 ## 7. EC2(Bastion)の作成
 * psqlによるRDBのテーブル作成や、APIGatewayのPrivate APIにアクセスするための踏み台を作成
@@ -101,42 +101,42 @@ aws cloudformation create-stack --stack-name Demo-Bastion-Stack --template-body 
 ## 8. RDBのテーブル作成
 * TODO: 現状のAPだとRDB対応できていないため作成不要
 
-* マネージドコンソールからEC2にセッションマネージャで接続し、Bastionにログインする。psqlをインストールし、DB接続する。
-    * 以下参考に、Bastionにpsqlをインストールするとよい
-        * https://techviewleo.com/how-to-install-postgresql-database-on-amazon-linux/
-* DB接続後、ユーザテーブルを作成する。        
-```sh
-sudo amazon-linux-extras install epel
+~~* マネージドコンソールからEC2にセッションマネージャで接続し、Bastionにログインする。psqlをインストールし、DB接続する。~~
+    ~~* 以下参考に、Bastionにpsqlをインストールするとよい~~
+        ~~* https://techviewleo.com/how-to-install-postgresql-database-on-amazon-linux/~~
+~~* DB接続後、ユーザテーブルを作成する~~
+~~```sh~~
+~~sudo amazon-linux-extras install epel~~
 
-sudo tee /etc/yum.repos.d/pgdg.repo<<EOF
-[pgdg14]
-name=PostgreSQL 14 for RHEL/CentOS 7 - x86_64
-baseurl=http://download.postgresql.org/pub/repos/yum/14/redhat/rhel-7-x86_64
-enabled=1
-gpgcheck=0
-EOF
+~~sudo tee /etc/yum.repos.d/pgdg.repo<<EOF~~
+~~[pgdg14]~~
+~~name=PostgreSQL 14 for RHEL/CentOS 7 - x86_64~~
+~~baseurl=http://download.postgresql.org/pub/repos/yum/14/redhat/rhel-7-x86_64~~
+~~enabled=1~~
+~~gpgcheck=0~~
+~~EOF~~
 
-sudo yum makecache
-sudo yum install postgresql14
+~~sudo yum makecache~~
+~~sudo yum install postgresql14~~
 
-#Auroraに直接接続
-#CloudFormationのDemo-RDS-Stackスタックの出力「RDSClusterEndpointAddress」の値を参照
-psql -h (Auroraのクラスタエンドポイント) -U postgres -d testdb    
+~~#Auroraに直接接続~~
+~~#CloudFormationのDemo-RDS-Stackスタックの出力「RDSClusterEndpointAddress」の値を参照~~
+~~psql -h (Auroraのクラスタエンドポイント) -U postgres -d testdb~~
 
-#ユーザテーブル作成
-CREATE TABLE IF NOT EXISTS m_user (user_id VARCHAR(50) PRIMARY KEY, user_name VARCHAR(50));
-#ユーザテーブルの作成を確認
-\dt
-#いったん切断
-\q
+~~#ユーザテーブル作成~~
+~~CREATE TABLE IF NOT EXISTS m_user (user_id VARCHAR(50) PRIMARY KEY, user_name VARCHAR(50));~~
+~~#ユーザテーブルの作成を確認~~
+~~\dt~~
+~~#いったん切断~~
+~~\q~~
 
-#RDS Proxyから接続しなおす
-#CloudFormationのDemo-RDS-Stackスタックの出力「RDSProxyEndpoint」の値を参照
-psql -h (RDS Proxyのエンドポイント) -U postgres -d testdb
-#ユーザテーブルの存在を確認
-\dt
+~~#RDS Proxyから接続しなおす~~
+~~#CloudFormationのDemo-RDS-Stackスタックの出力「RDSProxyEndpoint」の値を参照~~
+~~psql -h (RDS Proxyのエンドポイント) -U postgres -d testdb~~
+~~#ユーザテーブルの存在を確認~~
+~~\dt~~
 
-```
+~~```~~
 
 ## 9. DynamoDBのテーブル作成
 * TODO: 現状のAPだとRDBの代わりにUserテーブルも作成 
@@ -151,7 +151,8 @@ aws cloudformation create-stack --stack-name Demo-DynamoDB-Stack --template-body
 ## 10. AWS SAMでLambda/API Gatewayのデプロイ       
 * Cloud9で環境の作成
     * sam buildで、コンテナを使用したGraalVMのビルドにメモリを使用するため、t3.xlarge（16GiBメモリ）以上がのぞましい
-        * template.yamlで定義したFunctionごとに、ビルド用のコンテナが起動し、メモリを大量に消費する(7GB程度)。このため、本来4つのFunction/APIを実装しているが、template.yaml上、現状、2つのFunctionのみ動作するようにコメントアウトしている。
+    
+    * TODO: sam buildすると、template.yamlで定義したFunction数分、GraalVMのビルド用のコンテナが起動し、メモリを大量に消費する(7GB程度)。このため、本来4つのFunction/APIを実装しているが、メモリ16Gibで収まるよう、現状、2つのFunctionのみ動作するようにtemplate.yaml上、コメントアウトしている。
 
 * Cloud9の環境で以降を実施
 
@@ -202,7 +203,7 @@ make deploy
 * マネージドコンソールから、EC2(Bation)へSystems Manager Session Managerで接続して、curlコマンドで動作確認
     * 以下の実行例のURLを、sam deployの結果出力される実際のURLをに置き換えること
 
-* 現状Userサービスでユーザ情報を登録するPOSTのAPIと、Todoサービスでやることリストを登録するPOSTのAPIしか動作しない
+* TODO: 現状、Userサービスでユーザ情報を登録するPOSTのAPIと、Todoサービスでやることリストを登録するPOSTのAPIの2つのAPIしか動作しない
     * template.yamlで定義したFunctionごとに、ビルド用のコンテナが起動し、メモリを大量に消費する(7GB程度)。このため、本来4つのFunction/APIを実装しているが、template.yaml上、現状、2つのFunctionのみ動作するようにコメントアウトしている
 
 * Userサービスでユーザ情報を登録するPOSTのAPI実行例
