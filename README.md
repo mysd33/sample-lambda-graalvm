@@ -41,7 +41,7 @@
         * [EclipseやIntelliJへのプラグインインストール](https://mapstruct.org/documentation/ide-support/)
 
 * Cloud9等のAmazon Linux2によるビルド環境の準備
-    * GraalVMによって生成されるアーティファクトはプラットフォームに依存し、異なるアーキテクチャまたは OSのプラットフォームでは実行できない。このため、Amazon Linux2上でのビルドが必要である。
+    * GraalVMによって生成されるアーティファクトはプラットフォームに依存し、異なるアーキテクチャまたはOSのプラットフォームでは実行できない。このため、Amazon Linux2上でのビルドが必要である。
     * ソースコードの確認、修正は手元のWindows端末などでもよいが、ビルドやデプロイといったSAM CLIの実行を、Amazon Linux2環境としてCloud9を準備し、実施する。        
 
 ## 1. IAMの作成
@@ -156,11 +156,6 @@ aws cloudformation create-stack --stack-name Demo-DynamoDB-Stack --template-body
 
 * Cloud9の環境で以降を実施
 
-* git cloneで、ソースコードの取得
-```sh
-git clone https://xxxxxx/sample-lambda-graalvm
-```
-
 * SAM CLIのアップデート
 ```sh
 # SAM CLIのアップデート
@@ -171,7 +166,15 @@ sudo ./sam-installation/install --update
 sam --version
 ```
 
+* git cloneで、ソースコードの取得
+```sh
+git clone https://xxxxxx/sample-lambda-graalvm
+```
+
+
 * Lambda実行環境用にコンパイルするためのDockerイメージの作成
+    * GraalVMによって生成されるアーティファクトはプラットフォームに依存し、異なるアーキテクチャまたはOSのプラットフォームでは実行できない。このため、DockerイメージでLambdaの実行環境(provided.al2)と同じビルド環境を構築する
+    * コマンド実行により、Dockerfileをもとに、al2-graalvm:mavenという名前のイメージが作成される
 ```sh
 # al2-graalvm:mavenというDockerイメージを作成
 cd sample-lambda-graalvm
@@ -179,6 +182,9 @@ cd sample-lambda-graalvm
 ```
 
 * SAMビルド
+    * samconfig.tomlの設定により、ビルド時に前述のDockerイメージを使ったコンテナ上でビルドを実行する
+    * template.yamlのMetadataの設定により、Makefile上のターゲット「build_（関数名）」が、コンテナ上で実行される
+    * ビルドに成功すると、実行ファイル（todo-app）と、実行ファイルを起動するためのbootstrapファイルが、.aws-samフォルダ配下に生成される
 ```sh
 sam build
 
