@@ -74,6 +74,8 @@ aws cloudformation create-stack --stack-name Demo-NATGW-Stack --template-body fi
 ```
 
 ## 6. RDS Aurora Serverless v2 for PostgreSQL、SecretsManager、RDS Proxy作成
+* TODO: 現状のAPだとRDB不要
+
 * リソース作成に少し時間がかかる。(20分程度)
 ```sh
 aws cloudformation validate-template --template-body file://cfn-rds.yaml
@@ -91,6 +93,8 @@ aws cloudformation create-stack --stack-name Demo-Bastion-Stack --template-body 
     * 「--parameters ParameterKey=KeyPairName,ParameterValue=myKeyPair」
 
 ## 8. RDBのテーブル作成
+* TODO: 現状のAPだとRDB不要
+
 * マネージドコンソールからEC2にセッションマネージャで接続し、Bastionにログインする。psqlをインストールし、DB接続する。
     * 以下参考に、Bastionにpsqlをインストールするとよい
         * https://techviewleo.com/how-to-install-postgresql-database-on-amazon-linux/
@@ -129,6 +133,8 @@ psql -h (RDS Proxyのエンドポイント) -U postgres -d testdb
 ```
 
 ## 9. DynamoDBのテーブル作成
+* TODO: 現状のAPだとRDBの代わりにUserテーブルも作成 
+
 * DynamoDBにTODOテーブルを作成する。
 ```sh
 aws cloudformation validate-template --template-body file://cfn-dynamodb.yaml
@@ -139,8 +145,7 @@ aws cloudformation create-stack --stack-name Demo-DynamoDB-Stack --template-body
 ## 10. AWS SAMでLambda/API Gatewayのデプロイ       
 * Cloud9で環境の作成
     * sam buildで、コンテナを使用したGraalVMのビルドにメモリを使用するため、t3.xlarge（16GiBメモリ）以上がのぞましい
-        * template.yamlで定義したFunctionごとに、ビルド用のコンテナが起動し、メモリを大量に消費する(推定4GB以上)
-        。このため、本来4つのFunction/APIを実装しているが、template.yaml上、現状、2つのFunctionのみ動作するようにコメントアウトしている。
+        * template.yamlで定義したFunctionごとに、ビルド用のコンテナが起動し、メモリを大量に消費する(7GB程度)。このため、本来4つのFunction/APIを実装しているが、template.yaml上、現状、2つのFunctionのみ動作するようにコメントアウトしている。
 
 * Cloud9の環境で以降を実施
 
@@ -191,8 +196,8 @@ make deploy
 * マネージドコンソールから、EC2(Bation)へSystems Manager Session Managerで接続して、curlコマンドで動作確認
     * 以下の実行例のURLを、sam deployの結果出力される実際のURLをに置き換えること
 
-* TODO:現状Userサービスでユーザ情報を登録するPOSTのAPIしか動作しない
-    * sam buildの際、GraalVMでのDockerコンテナが関数分起動してしまい、メモリを相当量消費しアウトオブメモリーになってしまうため、1関数に絞って検証したため。
+* 現状Userサービスでユーザ情報を登録するPOSTのAPIと、Todoサービスでやることリストを登録するPOSTのAPIしか動作しない
+    * template.yamlで定義したFunctionごとに、ビルド用のコンテナが起動し、メモリを大量に消費する(7GB程度)。このため、本来4つのFunction/APIを実装しているが、template.yaml上、現状、2つのFunctionのみ動作するようにコメントアウトしている
 
 * Userサービスでユーザ情報を登録するPOSTのAPI実行例
     * UserサービスはRDB(RDS Proxy経由でAuroraへ)アクセスするサンプルAP
@@ -211,14 +216,14 @@ curl -X POST -H "Content-Type: application/json" -d '{ "user_name" : "Taro"}' ht
 ~~{"user_id":"99bf4d94-f6a4-11ed-85ec-be18af968bc1","user_name":"Taro"}~~
 ~~```~~
 
-~~* Todoサービスでやることリストを登録するPOSTのAPI実行例~~
-~~    * TodoサービスはDynamoDBアクセスするサンプルAP~~
-~~```sh~~
-~~curl -X POST -H "Content-Type: application/json" -d '{ "todo_title" : "ミルクを買う"}' https://civuzxdd14.execute-api.ap-northeast-1.amazonaws.com/Prod/todo~~
+* Todoサービスでやることリストを登録するPOSTのAPI実行例
+    * TodoサービスはDynamoDBアクセスするサンプルAP
+```sh
+curl -X POST -H "Content-Type: application/json" -d '{ "todo_title" : "ミルクを買う"}' https://civuzxdd14.execute-api.ap-northeast-1.amazonaws.com/Prod/todo
 
-~~# 登録結果を返却~~
-~~{"todo_id":"04a14ad3-f6a5-11ed-b40f-f2ead45b980a","todo_title":"ミルクを買う"}~~
-~~```~~
+# 登録結果を返却
+{"todo_id":"04a14ad3-f6a5-11ed-b40f-f2ead45b980a","todo_title":"ミルクを買う"}
+```
 
 ~~* Todoサービスでやること（TODO）を取得するGetのAPI実行例（todo/の後にPOSTのAPIで取得したTodo IDを指定）~~
 ~~```sh~~

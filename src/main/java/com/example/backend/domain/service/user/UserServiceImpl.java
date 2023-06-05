@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 //import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.amazonaws.xray.spring.aop.XRayEnabled;
 import com.example.backend.domain.model.User;
@@ -18,7 +17,7 @@ import lombok.RequiredArgsConstructor;
  *
  */
 @XRayEnabled
-@Transactional
+//@Transactional
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -31,7 +30,7 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    @Transactional(readOnly = true)
+    //@Transactional(readOnly = true)
     @Override
     public User findOne(String userId) {
         return userRepository.findOne(userId);

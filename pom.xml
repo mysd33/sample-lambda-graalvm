@@ -74,18 +74,22 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>dynamodb-enhanced</artifactId>
         </dependency>        
-        <!-- MyBatis -->        
+        <!-- MyBatis -->
+        <!--
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>${mybatis-spring-boot-starter.version}</version>
-        </dependency>        
-        <!-- PostgreSQL -->        
+        </dependency>
+        -->        
+        <!-- PostgreSQL -->
+        <!--        
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
-        </dependency>        
+        </dependency>
+        -->        
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -117,11 +121,12 @@
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-xray-recorder-sdk-spring</artifactId>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-xray-recorder-sdk-sql</artifactId>
 		</dependency>
-
+		-->
     </dependencies>
 
     <dependencyManagement>
@@ -172,13 +177,6 @@
             <plugin>
                 <groupId>org.graalvm.buildtools</groupId>
                 <artifactId>native-maven-plugin</artifactId>
-                <configuration>
-                    <buildArgs>
-                        <arg>--trace-class-initialization=org.apache.commons.logging.LogFactory,org.apache.commons.logging.LogFactoryService</arg>
-                        <arg>-H:+ReportExceptionStackTraces</arg>
-                        <arg>--initialize-at-build-time=org.apache.commons.logging.LogFactory,org.apache.commons.logging.LogFactoryService</arg>
-                    </buildArgs>
-                </configuration>
             </plugin>
             <!-- MapStruct -->            
             <plugin>
