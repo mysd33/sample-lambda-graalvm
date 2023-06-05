@@ -1,7 +1,7 @@
 # Private APIでのAPIGatewayを使ったLambda/Java + Spring Boot&Spring Cloud FunctionのAWS SAMサンプルAP（GraalVM版）
 
 * GraalVMの場合、リフレクションが使えないため、ビルドが通るか苦労する、実行時にも予期せぬエラー出る等、トライアンドエラーで進めて動くようになんとかするといったデリケートさで、トラブルがあってもインターネット上の情報も少ない。
-* 現状、このサンプルAPも、RDB（RDS Aurora）アクセス対応、X-Ray対応もうまく出来ていない状況。その他、DynamoDBEnhancedClientでのTableSchema.forBeanが使えない、AWS CRT等使えないので、回避する実装にするといったこともあったりした。
+* 現状、このサンプルAPも、RDB（RDS Aurora）アクセス対応、X-Ray本格対応もうまく出来ていない状況。その他、DynamoDBEnhancedClientでのTableSchema.forBeanが使えない、AWS CRT等使えないので、回避する実装にするといったこともあったりした。
 * SnapStart対応のような、template.yamlで有効化の設定をすれば、基本的には、通常のSpringBootアプリケーションの作り方で動かせるという感じで、簡単にはいかず、Spring Bootや周辺ライブラリを使ってのGraalVM実装は、正直、おすすめしない。GraalVMを使うなら、極力フレームワークを使わず、必要最低限のライブラリのみを使う実装方式をおすすめする。
 
 # 構成イメージ
@@ -21,10 +21,14 @@
 ![構成イメージ](image/demo.png)
 
 * X-Rayによる可視化
-    * API Gateway、Lambdaにおいて、X-Rayによる可視化にも対応している    
+    * API Gateway、Lambdaにおいて、X-Rayによる可視化にも対応している   
   ~~* RDB(RDS Aurora)へのアクセス、DynamoDBへのアクセスのトレースにも対応~~
-
-~~![X-Rayの可視化のコールドスタート例](image/xray.png)~~
+  
+    * TODO: RDB(RDS Aurora)へのアクセス、DynamoDBへのアクセスのトレースに対応できていない
+        * コールドスタートの例
+![X-Rayの可視化のコールドスタート例](image/xray.png)
+        * ウォームスタートの例
+![X-Rayの可視化のウォームスタート例](image/xray_warmstart.png)
 
 
 ## 事前準備
