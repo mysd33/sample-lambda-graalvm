@@ -1,7 +1,7 @@
 # Private APIでのAPIGatewayを使ったLambda/Java + Spring Boot&Spring Cloud FunctionのAWS SAMサンプルAP（GraalVM版）
 
 * GraalVMの場合、リフレクションが使えない。SpringBootは、GraalVM対応しているとはいえ、それ以外にもさまざまなライブラリを使っているため、ビルドが通るように設定するのに苦労する。また、実行時にも予期せぬエラー出る等、トライアンドエラーで進めてなんとか動くようにするといったデリケートさで、トラブルがあってもインターネット上の情報も少ない。
-* 現状、このサンプルAPも、RDB（RDS Aurora）アクセス対応、X-Ray本格対応が、出来ていないし、解決策が見つかっていない状況。その他、DynamoDBEnhancedClientでのTableSchema.forBeanが使えない、AWS CRT等使えないので、回避するため、使用しない実装に変えるといったこともあった。
+* 現状、このサンプルAPも、mybatisによるRDB（RDS Aurora）アクセス対応、X-Ray本格対応が、出来ていないし、解決策が見つかっていない状況。その他、DynamoDBEnhancedClientでのTableSchema.forBeanが使えない、AWS CRT等使えないので、回避するため、使用しない実装に変えるといったこともあった。
 * SnapStart対応では、template.yamlで有効化の設定をすれば、基本的には、通常のSpringBootアプリケーションの作り方で動かせるといった導入が簡単な感じがあったが、GraalVMの場合は簡単にはいかず、Spring Bootや周辺ライブラリを使ってのGraalVM実装は、正直、おすすめしない。GraalVMを使うなら、極力フレームワークを使わず、必要最低限のライブラリのみを使う実装方式をおすすめする。
 
 # 構成イメージ
