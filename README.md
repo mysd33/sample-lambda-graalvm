@@ -19,7 +19,8 @@
 
 * X-Rayによる可視化
     * API Gateway、Lambdaにおいて、X-Rayによる可視化にも対応している    
-~~    * RDB(RDS Aurora)へのアクセス、DynamoDBへのアクセスのトレースにも対応    ~~
+  ~~* RDB(RDS Aurora)へのアクセス、DynamoDBへのアクセスのトレースにも対応~~
+
 ~~![X-Rayの可視化のコールドスタート例](image/xray.png)~~
 
 
