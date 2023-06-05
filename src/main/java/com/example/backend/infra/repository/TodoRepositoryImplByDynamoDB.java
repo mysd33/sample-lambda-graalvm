@@ -10,10 +10,10 @@ import com.example.backend.domain.model.Todo;
 import com.example.backend.domain.repository.TodoRepository;
 
 import lombok.RequiredArgsConstructor;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
-//import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-//import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+//import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
+//import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
@@ -26,8 +26,8 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 @Repository
 @RequiredArgsConstructor
 public class TodoRepositoryImplByDynamoDB implements TodoRepository {
-    // private final DynamoDbEnhancedClient enhancedClient;
-    private final DynamoDbEnhancedAsyncClient enhancedClient;
+    private final DynamoDbEnhancedClient enhancedClient;
+    //private final DynamoDbEnhancedAsyncClient enhancedClient;
     private final TodoTableItemMapper todoTableItemMapper;
 
     @Value("${aws.dynamodb.todo-tablename}")
@@ -42,24 +42,25 @@ public class TodoRepositoryImplByDynamoDB implements TodoRepository {
         todo.setTodoId(UUID.randomUUID().toString());
         TodoTableItem todoItem = todoTableItemMapper.modelToTableItem(todo);
 
-        // DynamoDbTable<TodoTableItem> dynamoDb = createDynamoDBClient();
-        DynamoDbAsyncTable<TodoTableItem> dynamoDb = createDynamoDBClient();
-        dynamoDb.putItem(todoItem).join();
+        DynamoDbTable<TodoTableItem> dynamoDb = createDynamoDBClient();
+        dynamoDb.putItem(todoItem);
+        //DynamoDbAsyncTable<TodoTableItem> dynamoDb = createDynamoDBClient();
+        //dynamoDb.putItem(todoItem).join();
         return true;
     }
 
     @Override
     public Todo findById(String todoId) {
-        // DynamoDbTable<TodoTableItem> dynamoDb = createDynamoDBClient();
-        DynamoDbAsyncTable<TodoTableItem> dynamoDb = createDynamoDBClient();
+        DynamoDbTable<TodoTableItem> dynamoDb = createDynamoDBClient();
+        //DynamoDbAsyncTable<TodoTableItem> dynamoDb = createDynamoDBClient();
         Key key = Key.builder().partitionValue(todoId).build();
-        // TodoTableItem todoItem = dynamoDb.getItem(r -> r.key(key));
-        TodoTableItem todoItem = dynamoDb.getItem(r -> r.key(key)).join();
+        TodoTableItem todoItem = dynamoDb.getItem(r -> r.key(key));
+        //TodoTableItem todoItem = dynamoDb.getItem(r -> r.key(key)).join();
         return todoTableItemMapper.tableItemToModel(todoItem);
     }
 
-    // private DynamoDbTable<TodoTableItem> createDynamoDBClient() {
-    private DynamoDbAsyncTable<TodoTableItem> createDynamoDBClient() {
+    private DynamoDbTable<TodoTableItem> createDynamoDBClient() {
+    //private DynamoDbAsyncTable<TodoTableItem> createDynamoDBClient() {
         return enhancedClient.table(todoTableName, TableSchema.fromBean(TodoTableItem.class));
     }
 
